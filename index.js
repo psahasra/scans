@@ -1,13 +1,23 @@
 var async = require('async');
+var fs = require('fs');
+var path = require('path');
 
+//var argv = require('optimist').usage('Usage: $node index.js -keyid [access_key_ID] -secret [aws_secret] -region [region] -session_token [sessionToken]').demand(['keyid']).argv;
 // OPTION 1: Configure AWS credentials through hard-coded key and secret
-// var AWSConfig = {
-//     accessKeyId: '',
-//     secretAccessKey: '',
-//     sessionToken: '',
-//     region: 'us-east-1'
-// };
+var AWSConfig = {
+     accessKeyId: 'AKIAI3OZ7TVJ3OQ4AM4Q',
+     secretAccessKey: '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',
+	 sessionToken: '',
+     region: 'us-west-2'
+};
 
+/*var AWSConfig = {
+     accessKeyId: argv.keyid,
+     secretAccessKey: argv.secret,
+     sessionToken: argv.session_token,
+     region: argv.region
+};
+*/
 // OPTION 2: Import an AWS config file containing credentials
 // var AWSConfig = require(__dirname + '/credentials.json');
 
@@ -32,8 +42,13 @@ var plugins = [
     'rds/databaseSecurity.js'
 ];
 
-console.log('CATEGORY\t\tPLUGIN\t\t\t\tTEST\t\t\t\tRESOURCE\t\t\tREGION\t\tSTATUS\tMESSAGE');
+console.log('CATEGORY\t\tPLUGIN\tTEST\tRESOURCE\tREGION\tSTATUS\tMESSAGE');
 
+var table = '<html><title> AWS Infrastructure security test report</title><body><table border="1" bgcolor="#a3a3a3" id="issues">';
+var cell1 = '<tr bgcolor="#000099"><strong><th><font face="verdana" color="white">CATEGORY</font></th><th><font face="verdana" color="white">PLUGIN</font></th><th><font face="verdana" color="white">TEST</font></th><th><font face="verdana" color="white">RESOURCE</font></th><th><font face="verdana" color="white">REGION</font></th><th><font face="verdana" color="white">STATUS</font></th><th><font face="verdana" color="white">MESSAGE DESCRIPTION</font></th></tr>';
+table = table + cell1;
+var cellRow = '';
+var name = 'result.html';
 async.eachSeries(plugins, function(pluginPath, callback){
     var plugin = require(__dirname + '/plugins/' + pluginPath);
 
@@ -51,11 +66,30 @@ async.eachSeries(plugins, function(pluginPath, callback){
                 } else {
                     statusWord = 'UNKNOWN';
                 }
-                console.log(result.category + '\t\t' + result.title + '\t' + result.tests[i].title + '\t' + (result.tests[i].results[j].resource || 'N/A') + '\t' + (result.tests[i].results[j].region || 'Global') + '\t\t' + statusWord + '\t' + result.tests[i].results[j].message);
+
+                console.log(result.category + '\t\t' + result.title + '\t' + result.tests[i].title + '\t' + (result.tests[i].results[j].resource || 'N/A') + '\t' + (result.tests[i].results[j].region || 'Global') + '\t' + statusWord + '\t' + result.tests[i].results[j].message);
+                table = table + '<tr bgcolor="#e6ffe6">' + cellRow;
+                cellRow = '<td>' + result.category + '</td>' + '<td>' +  result.title + '</td>' + '<td>' + result.tests[i].title + '</td>' + '<td>' + (result.tests[i].results[j].resource || 'N/A') + '</td>' + '<td>' + (result.tests[i].results[j].region || 'Global') + '</td>' + '<td>' + statusWord + '</td>'  + '<td>' + result.tests[i].results[j].message + '</td>';
+                table = table + '\n' + '</tr>'
             }
         }
         callback(err);
+             
+        
     });
+    
 }, function(err, data){
-    if (err) return console.log(err);
+    if (err) {
+        return console.log(err);
+    } else {
+        table = table + '\n' + '</table></body></html>';
+        fs.writeFile(name, table, function(err) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("The scan results were saved to " + name);
+        }
+    });
+    }
 });
+
