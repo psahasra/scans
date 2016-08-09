@@ -5,8 +5,8 @@ var path = require('path');
 //var argv = require('optimist').usage('Usage: $node index.js -keyid [access_key_ID] -secret [aws_secret] -region [region] -session_token [sessionToken]').demand(['keyid']).argv;
 // OPTION 1: Configure AWS credentials through hard-coded key and secret
 var AWSConfig = {
-     accessKeyId: 'AKIAI3OZ7TVJ3OQ4AM4Q',
-     secretAccessKey: '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',
+     accessKeyId: 'aaaaaaa',
+     secretAccessKey: 'aaaa/bbbb',
 	 sessionToken: '',
      region: 'us-west-2'
 };
